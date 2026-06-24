@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f9d63" />
+  <meta name="description" content="Mijo : qu'est-ce qui mijote dans ton frigo ? Suis les dates de péremption et cuisine avec ce que tu as déjà." />
+  <title>Mijo — Cuisine ton frigo, zéro gaspi</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Mijo" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ===== En-tête ===== -->
+  <header class="appbar">
+    <div class="appbar__brand">
+      <span class="appbar__logo" aria-hidden="true">🍲</span>
+      <h1 class="appbar__title">Mijo</h1>
+    </div>
+    <div class="appbar__actions">
+      <button id="btn-open-scan-top" class="iconbtn" title="Scanner un aliment" aria-label="Scanner un aliment">
+        <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </button>
+      <button id="btn-notify" class="iconbtn" title="Activer les rappels de péremption" aria-label="Activer les rappels">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ===== Vue Frigo ===== -->
+    <section id="view-frigo" class="view view--active">
+
+      <div id="alert-banner" class="banner banner--hidden"></div>
+
+      <div class="toolbar">
+        <div class="toolbar__title">
+          <span id="stock-count" class="chip">0</span>
+          <span>aliments</span>
+        </div>
+        <label class="select">
+          <span class="select__label">Trier&nbsp;:</span>
+          <select id="sort-select">
+            <option value="expiry">Péremption</option>
+            <option value="added">Ajout récent</option>
+            <option value="name">Nom (A→Z)</option>
+          </select>
+        </label>
+      </div>
+
+      <ul id="stock-list" class="stock-list"></ul>
+
+      <div id="stock-empty" class="empty">
+        <div class="empty__emoji">🛒</div>
+        <h2>Ton frigo est vide</h2>
+        <p>Ajoute ce que tu viens d'acheter avec sa date de péremption. L'appli te dira quoi cuisiner en priorité.</p>
+        <button class="btn btn--primary" data-action="add-first">+ Ajouter un aliment</button>
+      </div>
+    </section>
+
+    <!-- ===== Vue Recettes ===== -->
+    <section id="view-recettes" class="view">
+      <div class="search">
+        <svg class="search__icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="recipe-search" type="search" inputmode="search" placeholder="Chercher une recette par nom…" autocomplete="off" />
+      </div>
+
+      <button id="btn-suggest" class="btn btn--primary btn--block">
+        ✨ Trouve-moi des recettes avec mon frigo
+      </button>
+      <p class="hint" id="suggest-hint">On privilégie les aliments qui périment bientôt 🔥</p>
+
+      <div id="recipe-status" class="status" hidden></div>
+      <div id="recipe-grid" class="recipe-grid"></div>
+
+      <div id="recipe-empty" class="empty">
+        <div class="empty__emoji">🍳</div>
+        <h2>Que cuisiner&nbsp;?</h2>
+        <p>Appuie sur le bouton ci-dessus pour des idées basées sur ce que tu as, ou cherche une recette par son nom.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== Bouton d'ajout flottant ===== -->
+  <button id="fab" class="fab" aria-label="Ajouter un aliment">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+
+  <!-- ===== Barre de navigation ===== -->
+  <nav class="tabbar">
+    <button class="tab tab--active" data-view="frigo">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11a2 2 0 0 1 2 2v15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a2 2 0 0 1 2-2z"/><path d="M3 11h15M8 6v2M8 14v2"/></svg>
+      <span>Frigo</span>
+    </button>
+    <button class="tab" data-view="recettes">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18M12 11V3M7 7l5-4 5 4M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>
+      <span>Recettes</span>
+    </button>
+  </nav>
+
+  <!-- ===== Feuille d'ajout / édition ===== -->
+  <div id="sheet-backdrop" class="backdrop" hidden></div>
+  <div id="item-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>
+    <div class="sheet__handle"></div>
+    <h2 id="sheet-title" class="sheet__title">Ajouter un aliment</h2>
+    <button type="button" id="btn-open-scan" class="btn btn--scan btn--block">
+      📷 Scanner le produit / lire la date
+    </button>
+    <div class="sheet__or"><span>ou saisis à la main</span></div>
+    <form id="item-form" class="form">
+      <input type="hidden" id="item-id" />
+
+      <label class="field">
+        <span class="field__label">Aliment</span>
+        <input id="item-name" list="ingredient-list" type="text" placeholder="ex. Poulet, Tomate, Yaourt…" autocomplete="off" required />
+        <datalist id="ingredient-list"></datalist>
+      </label>
+
+      <div class="field-row">
+        <label class="field field--grow">
+          <span class="field__label">Date de péremption</span>
+          <input id="item-expiry" type="date" required />
+        </label>
+        <label class="field">
+          <span class="field__label">Quantité <em>(optionnel)</em></span>
+          <input id="item-qty" type="text" inputmode="text" placeholder="ex. 500 g, 2" autocomplete="off" />
+        </label>
+      </div>
+
+      <div class="quickdates" id="quickdates">
+        <button type="button" data-days="2">+2 j</button>
+        <button type="button" data-days="5">+5 j</button>
+        <button type="button" data-days="7">+1 sem.</button>
+        <button type="button" data-days="14">+2 sem.</button>
+        <button type="button" data-days="30">+1 mois</button>
+      </div>
+
+      <div class="sheet__actions">
+        <button type="button" id="btn-delete-item" class="btn btn--danger-ghost" hidden>Supprimer</button>
+        <button type="button" id="btn-cancel" class="btn btn--ghost">Annuler</button>
+        <button type="submit" class="btn btn--primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===== Détail recette ===== -->
+  <div id="recipe-detail" class="detail" hidden>
+    <div class="detail__bar">
+      <button id="btn-detail-close" class="iconbtn" aria-label="Fermer">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 5 5 19M5 5l14 14"/></svg>
+      </button>
+      <span class="detail__bartitle" id="detail-bartitle"></span>
+    </div>
+    <div id="detail-body" class="detail__body"></div>
+  </div>
+
+  <!-- ===== Écran de scan ===== -->
+  <div id="scan-overlay" class="scan" hidden>
+    <div class="detail__bar">
+      <button id="btn-scan-close" class="iconbtn" aria-label="Fermer">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 5 5 19M5 5l14 14"/></svg>
+      </button>
+      <span class="detail__bartitle">Scanner un aliment</span>
+    </div>
+
+    <div class="scan__body">
+      <div id="scan-reader" class="scan__reader"></div>
+      <p class="scan__status" id="scan-status">Vise le code-barres du produit 📷</p>
+
+      <button id="btn-scan-photo" class="btn btn--ghost btn--block">
+        🥦 Pas de code-barres ? Photographier l'aliment
+      </button>
+
+      <div class="scan__recap">
+        <label class="field">
+          <span class="field__label">Aliment détecté <em>(modifiable)</em></span>
+          <input id="scan-name" type="text" list="ingredient-list" placeholder="Aucun pour l'instant…" autocomplete="off" />
+        </label>
+        <label class="field">
+          <span class="field__label">Date de péremption</span>
+          <input id="scan-expiry" type="date" />
+        </label>
+        <button id="btn-scan-date" class="btn btn--ghost btn--block">
+          📅 Lire la date sur l'emballage (photo)
+        </button>
+        <button id="btn-scan-confirm" class="btn btn--primary btn--block">Vérifier et ajouter ✓</button>
+      </div>
+    </div>
+
+    <input id="scan-food-input" type="file" accept="image/*" capture="environment" hidden />
+    <input id="scan-date-input" type="file" accept="image/*" capture="environment" hidden />
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="js/ingredients-fr.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/scan.js"></script>
+</body>
+</html>
