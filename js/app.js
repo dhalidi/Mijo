@@ -19,12 +19,32 @@ function loadItems() {
   try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
   catch { return []; }
 }
-function saveItems(items) { localStorage.setItem(STORE_KEY, JSON.stringify(items)); }
+function saveItems(items) {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(items)); }
+  catch (e) { warnStorage(); }
+}
 function loadSettings() {
   try { return JSON.parse(localStorage.getItem(SET_KEY)) || {}; }
   catch { return {}; }
 }
-function saveSettings(s) { localStorage.setItem(SET_KEY, JSON.stringify(s)); }
+function saveSettings(s) {
+  try { localStorage.setItem(SET_KEY, JSON.stringify(s)); }
+  catch (e) { /* réglages non critiques */ }
+}
+
+/* Vérifie que le stockage local est utilisable (sinon : mode privé / bloqué). */
+let _storageWarned = false;
+function warnStorage() {
+  if (_storageWarned) return;
+  _storageWarned = true;
+  toast("⚠️ Ton navigateur bloque la sauvegarde (navigation privée ?)");
+}
+function checkStorage() {
+  try {
+    const k = "frigo.test";
+    localStorage.setItem(k, "1"); localStorage.removeItem(k);
+  } catch (e) { warnStorage(); }
+}
 
 /* ---------- Dates ---------- */
 function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
@@ -596,6 +616,7 @@ function populateDatalist() {
   dl.innerHTML = window.FR_INGREDIENTS.map((it) => `<option value="${escapeHtml(it.fr)}">`).join("");
 }
 function init() {
+  checkStorage();
   populateDatalist();
   renderStock();
   refreshNotifyButton();

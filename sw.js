@@ -1,6 +1,6 @@
 /* Service worker — coquille de l'app en cache (hors-ligne) + cache runtime
    pour l'API et les images de recettes. */
-const VERSION = "mijo-v3";
+const VERSION = "mijo-v4";
 const SHELL = `${VERSION}-shell`;
 const RUNTIME = `${VERSION}-runtime`;
 
